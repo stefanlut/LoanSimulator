@@ -4,130 +4,221 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LoanSimulator"
+        xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         mc:Ignorable="d"
-        Title="Student Loan Simulator" Height="600" Width="900">
-    <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        
-        <!-- Input Section -->
-        <GroupBox Header="Add New Loan" Grid.Row="0" Margin="0,0,0,10">
+        Title="Loan Simulator" Height="700" Width="1200">
+
+    <TabControl Margin="10">
+        <!-- Loan Management Tab -->
+        <TabItem Header="📊 Loan Management">
             <Grid Margin="10">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="200"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="200"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                
-                <!-- Loan Name -->
-                <Label Content="Loan Name:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"/>
-                <TextBox Text="{Binding CurrentLoan.Name, UpdateSourceTrigger=PropertyChanged}" 
-                         Grid.Row="0" Grid.Column="1" Margin="5" Padding="3"/>
-                
-                <!-- Current Balance -->
-                <Label Content="Current Balance ($):" Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0"/>
-                <TextBox Text="{Binding CurrentLoan.CurrentBalance, UpdateSourceTrigger=LostFocus, ValidatesOnDataErrors=False}" 
-                         Grid.Row="0" Grid.Column="3" Margin="5" Padding="3"/>
-                
-                <!-- Interest Rate -->
-                <Label Content="Interest Rate (%):" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"/>
-                <TextBox Text="{Binding CurrentLoan.InterestRate, UpdateSourceTrigger=LostFocus, ValidatesOnDataErrors=False}" 
-                         Grid.Row="1" Grid.Column="1" Margin="5" Padding="3"/>
-                
-                <!-- Monthly Payment -->
-                <Label Content="Monthly Payment ($):" Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0"/>
-                <TextBox Text="{Binding CurrentLoan.MonthlyPayment, UpdateSourceTrigger=LostFocus, ValidatesOnDataErrors=False}" 
-                         Grid.Row="1" Grid.Column="3" Margin="5" Padding="3"/>
-                
-                <!-- Payment Day -->
-                <Label Content="Payment Day (1-28):" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center"/>
-                <TextBox Text="{Binding CurrentLoan.PaymentDay, UpdateSourceTrigger=PropertyChanged}" 
-                         Grid.Row="2" Grid.Column="1" Margin="5" Padding="3"/>
-                
-                <!-- Buttons -->
-                <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5" Margin="5,10,5,5">
-                    <Button Content="Add Loan" 
-                            Command="{Binding AddLoanCommand}"
-                            Margin="0,0,10,0" Padding="10,5"/>
-                    <Button Content="Save Loans" 
-                            Command="{Binding SaveLoansCommand}"
-                            Margin="0,0,10,0" Padding="10,5"/>
-                    <Button Content="Save As..." 
-                            Command="{Binding SaveAsLoansCommand}"
-                            Margin="0,0,10,0" Padding="10,5"/>
-                    <Button Content="Load Loans" 
-                            Command="{Binding LoadLoansCommand}"
-                            Margin="0,0,10,0" Padding="10,5"/>
-                    <Button Content="Clear All" 
-                            Command="{Binding ClearAllLoansCommand}"
-                            Padding="10,5" 
-                            Background="LightCoral"
-                            Foreground="White"/>
-                </StackPanel>
-            </Grid>
-        </GroupBox>
-        
-        <!-- Loans List Section -->
-        <GroupBox Header="Your Loans" Grid.Row="1">
-            <Grid>
-                <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 
-                <DataGrid Grid.Row="0" ItemsSource="{Binding Loans}" 
-                          AutoGenerateColumns="False" 
-                          IsReadOnly="False"
-                          GridLinesVisibility="Horizontal"
-                          HeadersVisibility="Column"
-                          Margin="10,10,10,5"
-                          CanUserAddRows="False"
-                          CanUserDeleteRows="True"
-                          SelectionMode="Single">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Loan Name" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="*" IsReadOnly="False"/>
-                        <DataGridTextColumn Header="Current Balance" Binding="{Binding CurrentBalance, UpdateSourceTrigger=PropertyChanged, StringFormat=C}" Width="120" IsReadOnly="False"/>
-                        <DataGridTextColumn Header="Interest Rate" Binding="{Binding InterestRate, UpdateSourceTrigger=PropertyChanged, StringFormat='{}{0:F2}%'}" Width="100" IsReadOnly="False"/>
-                        <DataGridTextColumn Header="Monthly Payment" Binding="{Binding MonthlyPayment, UpdateSourceTrigger=PropertyChanged, StringFormat=C}" Width="120" IsReadOnly="False"/>
-                        <DataGridTextColumn Header="Monthly Interest" Binding="{Binding MonthlyInterest, StringFormat=C}" Width="120" IsReadOnly="True"/>
-                        <DataGridTextColumn Header="Payment Day" Binding="{Binding PaymentDay, UpdateSourceTrigger=PropertyChanged}" Width="80" IsReadOnly="False"/>
-                        <DataGridTextColumn Header="Estimated Payoff" Binding="{Binding EstimatedPayoffDate, StringFormat=d}" Width="120" IsReadOnly="True"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-                
-                <!-- Totals Section -->
-                <Border Grid.Row="1" Background="LightGray" Padding="10,5" Margin="10,0,10,10">
-                    <Grid>
+                <!-- Input Section -->
+                <GroupBox Header="Add New Loan" Grid.Row="0" Margin="0,0,0,10">
+                    <Grid Margin="10">
                         <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="200"/>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="120"/>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="120"/>
-                            <ColumnDefinition Width="120"/>
-                            <ColumnDefinition Width="80"/>
-                            <ColumnDefinition Width="120"/>
                         </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
                         
-                        <TextBlock Grid.Column="0" Text="TOTALS:" FontWeight="Bold" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="1" Text="{Binding TotalBalance, StringFormat=C}" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                        <TextBlock Grid.Column="2" Text="" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="3" Text="{Binding TotalMonthlyPayment, StringFormat=C}" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                        <TextBlock Grid.Column="4" Text="{Binding TotalMonthlyInterest, StringFormat=C}" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                        <TextBlock Grid.Column="5" Text="" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="6" Text="" VerticalAlignment="Center"/>
+                        <!-- Loan Name -->
+                        <Label Content="Loan Name:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"/>
+                        <TextBox Text="{Binding CurrentLoan.Name, UpdateSourceTrigger=PropertyChanged}" 
+                                 Grid.Row="0" Grid.Column="1" Margin="5" Padding="3"/>
+                        
+                        <!-- Current Balance -->
+                        <Label Content="Current Balance ($):" Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                        <TextBox Text="{Binding CurrentLoan.CurrentBalance, UpdateSourceTrigger=LostFocus, ValidatesOnDataErrors=False}" 
+                                 Grid.Row="0" Grid.Column="3" Margin="5" Padding="3"/>
+                        
+                        <!-- Interest Rate -->
+                        <Label Content="Interest Rate (%):" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"/>
+                        <TextBox Text="{Binding CurrentLoan.InterestRate, UpdateSourceTrigger=LostFocus, ValidatesOnDataErrors=False}" 
+                                 Grid.Row="1" Grid.Column="1" Margin="5" Padding="3"/>
+                        
+                        <!-- Monthly Payment -->
+                        <Label Content="Monthly Payment ($):" Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                        <TextBox Text="{Binding CurrentLoan.MonthlyPayment, UpdateSourceTrigger=LostFocus, ValidatesOnDataErrors=False}" 
+                                 Grid.Row="1" Grid.Column="3" Margin="5" Padding="3"/>
+                        
+                        <!-- Payment Day -->
+                        <Label Content="Payment Day (1-28):" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center"/>
+                        <TextBox Text="{Binding CurrentLoan.PaymentDay, UpdateSourceTrigger=PropertyChanged}" 
+                                 Grid.Row="2" Grid.Column="1" Margin="5" Padding="3"/>
+                        
+                        <!-- Buttons -->
+                        <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5" Margin="5,10,5,5">
+                            <Button Content="Add Loan" 
+                                    Command="{Binding AddLoanCommand}"
+                                    Margin="0,0,10,0" Padding="10,5"/>
+                            <Button Content="Save Loans" 
+                                    Command="{Binding SaveLoansCommand}"
+                                    Margin="0,0,10,0" Padding="10,5"/>
+                            <Button Content="Save As..." 
+                                    Command="{Binding SaveAsLoansCommand}"
+                                    Margin="0,0,10,0" Padding="10,5"/>
+                            <Button Content="Load Loans" 
+                                    Command="{Binding LoadLoansCommand}"
+                                    Margin="0,0,10,0" Padding="10,5"/>
+                            <Button Content="Clear All" 
+                                    Command="{Binding ClearAllLoansCommand}"
+                                    Padding="10,5" 
+                                    Background="LightCoral"
+                                    Foreground="White"/>
+                        </StackPanel>
                     </Grid>
-                </Border>
+                </GroupBox>
+                
+                <!-- Loans List Section -->
+                <GroupBox Header="Your Loans" Grid.Row="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        
+                        <DataGrid Grid.Row="0" ItemsSource="{Binding Loans}" 
+                                  AutoGenerateColumns="False" 
+                                  IsReadOnly="False"
+                                  GridLinesVisibility="Horizontal"
+                                  HeadersVisibility="Column"
+                                  Margin="10,10,10,5"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="True"
+                                  SelectionMode="Single">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Loan Name" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="*" IsReadOnly="False"/>
+                                <DataGridTextColumn Header="Current Balance" Binding="{Binding CurrentBalance, UpdateSourceTrigger=PropertyChanged, StringFormat=C}" Width="120" IsReadOnly="False"/>
+                                <DataGridTextColumn Header="Interest Rate" Binding="{Binding InterestRate, UpdateSourceTrigger=PropertyChanged, StringFormat='{}{0:F2}%'}" Width="100" IsReadOnly="False"/>
+                                <DataGridTextColumn Header="Monthly Payment" Binding="{Binding MonthlyPayment, UpdateSourceTrigger=PropertyChanged, StringFormat=C}" Width="120" IsReadOnly="False"/>
+                                <DataGridTextColumn Header="Monthly Interest" Binding="{Binding MonthlyInterest, StringFormat=C}" Width="120" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Payment Day" Binding="{Binding PaymentDay, UpdateSourceTrigger=PropertyChanged}" Width="80" IsReadOnly="False"/>
+                                <DataGridTextColumn Header="Estimated Payoff" Binding="{Binding EstimatedPayoffDate, StringFormat=d}" Width="120" IsReadOnly="True"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        
+                        <!-- Totals Section -->
+                        <Border Grid.Row="1" Background="LightGray" Padding="10,5" Margin="10,0,10,10">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="120"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <TextBlock Grid.Column="0" Text="TOTALS:" FontWeight="Bold" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="{Binding TotalBalance, StringFormat=C}" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Column="2" Text="" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="3" Text="{Binding TotalMonthlyPayment, StringFormat=C}" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Column="4" Text="{Binding TotalMonthlyInterest, StringFormat=C}" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Column="5" Text="" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="6" Text="" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </GroupBox>
             </Grid>
-        </GroupBox>
-    </Grid>
+        </TabItem>
+        
+        <!-- Visualization Tab -->
+        <TabItem Header="📈 Loan Progress Visualization">
+            <Grid Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Chart Controls -->
+                <GroupBox Header="Chart Settings" Grid.Row="0" Margin="0,0,0,10">
+                    <StackPanel Orientation="Horizontal" Margin="10">
+                        <Label Content="Time Range (Years):" VerticalAlignment="Center"/>
+                        <ComboBox x:Name="TimeRangeComboBox" 
+                                  SelectedValue="{Binding SelectedTimeRange}" 
+                                  SelectedValuePath="Tag"
+                                  Width="100" Margin="5,0,20,0"
+                                  VerticalAlignment="Center">
+                            <ComboBoxItem Content="5 Years" Tag="5"/>
+                            <ComboBoxItem Content="10 Years" Tag="10"/>
+                            <ComboBoxItem Content="15 Years" Tag="15"/>
+                            <ComboBoxItem Content="20 Years" Tag="20"/>
+                            <ComboBoxItem Content="30 Years" Tag="30" IsSelected="True"/>
+                        </ComboBox>
+                        
+                        <Button Content="Refresh Chart" 
+                                Command="{Binding RefreshChartCommand}"
+                                Padding="10,5" Margin="10,0"/>
+                    </StackPanel>
+                </GroupBox>
+                
+                <!-- Loan Visibility Controls -->
+                <GroupBox Header="Loan Visibility" Grid.Row="1" Margin="0,0,0,10">
+                    <Grid Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        
+                        <!-- Quick Actions -->
+                        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
+                            <Button Content="Show All" 
+                                    Command="{Binding ShowAllLoansCommand}"
+                                    Padding="8,4" Margin="0,0,10,0"/>
+                            <Button Content="Hide All" 
+                                    Command="{Binding HideAllLoansCommand}"
+                                    Padding="8,4" Margin="0,0,10,0"/>
+                            <CheckBox Content="Show Total Balance Line" 
+                                      IsChecked="{Binding ShowTotalBalance}"
+                                      VerticalAlignment="Center" Margin="20,0,0,0"/>
+                        </StackPanel>
+                        
+                        <!-- Individual Loan Controls -->
+                        <ItemsControl ItemsSource="{Binding LoanVisibilityItems}" Grid.Row="1">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <CheckBox Content="{Binding LoanName}" 
+                                              IsChecked="{Binding IsVisible}"
+                                              Margin="0,0,20,5"
+                                              Command="{Binding DataContext.RefreshChartCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
+                </GroupBox>
+                
+                <!-- Chart Section -->
+                <GroupBox Header="Loan Balance Progress Over Time" Grid.Row="2">
+                    <Grid Margin="10">
+                        <lvc:CartesianChart Series="{Binding ChartSeries}" 
+                                           XAxes="{Binding XAxes}" 
+                                           YAxes="{Binding YAxes}"
+                                           LegendPosition="Right"
+                                           TooltipPosition="Top"/>
+                    </Grid>
+                </GroupBox>
+            </Grid>
+        </TabItem>
+    </TabControl>
 </Window>
