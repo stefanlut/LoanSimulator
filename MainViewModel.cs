@@ -53,6 +53,14 @@ namespace LoanSimulator
             }
         }
 
+        public decimal TotalMinimumPayment
+        {
+            get
+            {
+                return Loans.Sum(loan => loan.MinimumPayment);
+            }
+        }
+
         public ICommand AddLoanCommand { get; }
         public ICommand SaveLoansCommand { get; }
         public ICommand SaveAsLoansCommand { get; }
@@ -61,6 +69,7 @@ namespace LoanSimulator
         public ICommand RefreshChartCommand { get; }
         public ICommand ShowAllLoansCommand { get; }
         public ICommand HideAllLoansCommand { get; }
+        public ICommand AnalyzeLoansCommand { get; }
 
         // Chart properties
         public ObservableCollection<ISeries> ChartSeries { get; } = new ObservableCollection<ISeries>();
@@ -77,6 +86,106 @@ namespace LoanSimulator
                 _showTotalBalance = value;
                 OnPropertyChanged(nameof(ShowTotalBalance));
                 RefreshChart();
+            }
+        }
+
+        // AI Advisor properties
+        private readonly LoanAdvisor _loanAdvisor = new LoanAdvisor();
+        private string _selectedGoalType = "MinimizeTotalInterest";
+        private decimal _extraBudget = 0;
+        private DateTime? _targetDate;
+        private string _overallStrategy = "Add loans and set your financial goals to get AI-powered recommendations.";
+        private ObservableCollection<LoanAdvisor.PaymentRecommendation> _paymentRecommendations = new();
+        private ObservableCollection<string> _keyInsights = new();
+        private ObservableCollection<string> _warnings = new();
+        private bool _isAnalyzing = false;
+
+        public string SelectedGoalType
+        {
+            get => _selectedGoalType;
+            set
+            {
+                _selectedGoalType = value;
+                OnPropertyChanged(nameof(SelectedGoalType));
+            }
+        }
+
+        public decimal ExtraBudget
+        {
+            get => _extraBudget;
+            set
+            {
+                _extraBudget = value;
+                OnPropertyChanged(nameof(ExtraBudget));
+            }
+        }
+
+        public DateTime? TargetDate
+        {
+            get => _targetDate;
+            set
+            {
+                _targetDate = value;
+                OnPropertyChanged(nameof(TargetDate));
+            }
+        }
+
+        public string OverallStrategy
+        {
+            get => _overallStrategy;
+            set
+            {
+                _overallStrategy = value;
+                OnPropertyChanged(nameof(OverallStrategy));
+            }
+        }
+
+        public ObservableCollection<LoanAdvisor.PaymentRecommendation> PaymentRecommendations
+        {
+            get => _paymentRecommendations;
+            set
+            {
+                _paymentRecommendations = value;
+                OnPropertyChanged(nameof(PaymentRecommendations));
+            }
+        }
+
+        public ObservableCollection<string> KeyInsights
+        {
+            get => _keyInsights;
+            set
+            {
+                _keyInsights = value;
+                OnPropertyChanged(nameof(KeyInsights));
+            }
+        }
+
+        public ObservableCollection<string> Warnings
+        {
+            get => _warnings;
+            set
+            {
+                _warnings = value;
+                OnPropertyChanged(nameof(Warnings));
+            }
+        }
+
+        public bool IsAnalyzing
+        {
+            get => _isAnalyzing;
+            set
+            {
+                _isAnalyzing = value;
+                OnPropertyChanged(nameof(IsAnalyzing));
+            }
+        }
+
+        public decimal AverageInterestRate
+        {
+            get
+            {
+                if (Loans.Count == 0) return 0;
+                return Loans.Average(l => l.InterestRate);
             }
         }
 
@@ -102,8 +211,7 @@ namespace LoanSimulator
             RefreshChartCommand = new RelayCommand(RefreshChart);
             ShowAllLoansCommand = new RelayCommand(ShowAllLoans);
             HideAllLoansCommand = new RelayCommand(HideAllLoans);
-            ShowAllLoansCommand = new RelayCommand(ShowAllLoans);
-            HideAllLoansCommand = new RelayCommand(HideAllLoans);
+            AnalyzeLoansCommand = new RelayCommand(async () => await AnalyzeLoans(), () => Loans.Count > 0);
 
             // Initialize chart axes
             XAxes = new Axis[]
@@ -137,6 +245,8 @@ namespace LoanSimulator
                 OnPropertyChanged(nameof(TotalBalance));
                 OnPropertyChanged(nameof(TotalMonthlyPayment));
                 OnPropertyChanged(nameof(TotalMonthlyInterest));
+                OnPropertyChanged(nameof(TotalMinimumPayment));
+                OnPropertyChanged(nameof(AverageInterestRate));
 
                 // Subscribe to property changes of new items
                 if (e.NewItems != null)
@@ -410,11 +520,13 @@ namespace LoanSimulator
             // Update totals when any loan property changes
             if (e.PropertyName == nameof(Loan.CurrentBalance) ||
                 e.PropertyName == nameof(Loan.MonthlyPayment) ||
-                e.PropertyName == nameof(Loan.MonthlyInterest))
+                e.PropertyName == nameof(Loan.MonthlyInterest) ||
+                e.PropertyName == nameof(Loan.MinimumPayment))
             {
                 OnPropertyChanged(nameof(TotalBalance));
                 OnPropertyChanged(nameof(TotalMonthlyPayment));
                 OnPropertyChanged(nameof(TotalMonthlyInterest));
+                OnPropertyChanged(nameof(TotalMinimumPayment));
 
                 // Refresh chart when loan properties change
                 RefreshChart();
@@ -567,6 +679,60 @@ namespace LoanSimulator
             foreach (var visibilityItem in LoanVisibilityItems)
             {
                 visibilityItem.IsVisible = false;
+            }
+        }
+
+        private async Task AnalyzeLoans()
+        {
+            if (Loans.Count == 0) return;
+
+            IsAnalyzing = true;
+            try
+            {
+                var goalType = SelectedGoalType switch
+                {
+                    "MinimizeTotalInterest" => LoanAdvisor.GoalType.MinimizeTotalInterest,
+                    "PayOffFastest" => LoanAdvisor.GoalType.PayoffAllLoans,
+                    "TargetDate" => LoanAdvisor.GoalType.PayoffAllLoans,
+                    "ReducePayments" => LoanAdvisor.GoalType.ReduceMonthlyPayments,
+                    "FreeUpCash" => LoanAdvisor.GoalType.FreeUpCashFlow,
+                    "Consolidate" => LoanAdvisor.GoalType.DebtConsolidation,
+                    _ => LoanAdvisor.GoalType.MinimizeTotalInterest
+                };
+
+                var goals = new List<LoanAdvisor.FinancialGoal>
+                {
+                    new LoanAdvisor.FinancialGoal
+                    {
+                        Type = goalType,
+                        TargetAmount = ExtraBudget,
+                        TargetDate = TargetDate ?? DateTime.Now.AddYears(5),
+                        Priority = 1,
+                        Description = $"Primary goal: {SelectedGoalType}"
+                    }
+                };
+
+                var result = await _loanAdvisor.AnalyzeLoansAsync(
+                    Loans.ToList(),
+                    goals,
+                    ExtraBudget
+                );
+
+                OverallStrategy = result.OverallStrategy;
+                PaymentRecommendations = new ObservableCollection<LoanAdvisor.PaymentRecommendation>(result.Recommendations);
+                KeyInsights = new ObservableCollection<string>(result.KeyInsights);
+                Warnings = new ObservableCollection<string>(result.Warnings);
+            }
+            catch (Exception ex)
+            {
+                OverallStrategy = $"Error analyzing loans: {ex.Message}. Please ensure Ollama is running locally with a model available.";
+                PaymentRecommendations.Clear();
+                KeyInsights.Clear();
+                Warnings.Clear();
+            }
+            finally
+            {
+                IsAnalyzing = false;
             }
         }
 

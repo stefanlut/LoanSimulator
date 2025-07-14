@@ -8,6 +8,7 @@ namespace LoanSimulator
         private decimal _currentBalance;
         private decimal _interestRate;
         private decimal _monthlyPayment;
+        private decimal _minimumPayment;
 
         public string Name
         {
@@ -51,6 +52,16 @@ namespace LoanSimulator
                 _monthlyPayment = value;
                 OnPropertyChanged(nameof(MonthlyPayment));
                 OnPropertyChanged(nameof(EstimatedPayoffDate));
+            }
+        }
+
+        public decimal MinimumPayment
+        {
+            get => _minimumPayment;
+            set
+            {
+                _minimumPayment = value;
+                OnPropertyChanged(nameof(MinimumPayment));
             }
         }
 
