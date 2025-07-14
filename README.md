@@ -38,7 +38,7 @@ A comprehensive Windows Presentation Foundation (WPF) application for managing p
 - **Delete & Clear**: Remove individual loans or clear entire portfolio
 - **Smart Totals**: Live calculation of total balances, payments, and minimum obligations
 
-### � Visualization Tab *(NEW)*
+### 📈 Visualization Tab *(NEW)*
 - **Interactive Charts**: Powered by LiveCharts for smooth, responsive visualizations
 - **Loan Balance Projections**: See how each loan balance decreases over time
 - **Visibility Controls**: Toggle individual loans or total balance line
