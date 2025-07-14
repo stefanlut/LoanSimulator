@@ -427,6 +427,8 @@ namespace LoanSimulator
                 {
                     Loans.Add(loan);
                 }
+                // Ensure visibility items are properly synchronized
+                RebuildVisibilityItems();
 
                 if (loadedLoans.Count > 0)
                 {
@@ -462,6 +464,8 @@ namespace LoanSimulator
                 {
                     Loans.Add(loan);
                 }
+                // Ensure visibility items are properly synchronized
+                RebuildVisibilityItems();
             }
             catch (Exception ex)
             {
@@ -502,6 +506,7 @@ namespace LoanSimulator
             if (result == System.Windows.MessageBoxResult.Yes)
             {
                 Loans.Clear();
+                RebuildVisibilityItems(); // Ensure visibility items are properly cleared
                 CommandManager.InvalidateRequerySuggested();
                 System.Windows.MessageBox.Show("All loans have been cleared.",
                     "Clear Complete",
@@ -733,6 +738,23 @@ namespace LoanSimulator
             finally
             {
                 IsAnalyzing = false;
+            }
+        }
+
+        private void RebuildVisibilityItems()
+        {
+            LoanVisibilityItems.Clear();
+            foreach (var loan in Loans)
+            {
+                var visibilityItem = new LoanVisibilityItem(loan);
+                visibilityItem.PropertyChanged += (sender, args) =>
+                {
+                    if (args.PropertyName == nameof(LoanVisibilityItem.IsVisible))
+                    {
+                        RefreshChart();
+                    }
+                };
+                LoanVisibilityItems.Add(visibilityItem);
             }
         }
 
